@@ -1,4 +1,4 @@
-﻿namespace LiveChartMeParser.Models;
+﻿namespace LiveChartMeParser._oldModels;
 
 public sealed class Anime
 {

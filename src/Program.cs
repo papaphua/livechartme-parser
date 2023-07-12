@@ -1,5 +1,6 @@
 ﻿using LiveChartMeParser.Models;
+using LiveChartMeParser.Models.Parser;
 
-Parser parser = new();
+var animeParser = new AnimeParser();
 
-parser.Parse();
+animeParser.ParseBySeason(Seasons.Summer, 1917);
