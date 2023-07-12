@@ -1,14 +1,15 @@
 ﻿using LiveChartMeParser.Models.Helpers;
+using LiveChartMeParser.Models.Primitives;
 
 namespace LiveChartMeParser.Models.Parser;
 
-public sealed class AnimeParser
+public sealed class AnimeParser : Singleton<AnimeParser>
 {
     private readonly ChartParser _chartParser;
 
-    public AnimeParser()
+    private AnimeParser()
     {
-        _chartParser = new ChartParser();
+        _chartParser = ChartParser.Instance;
     }
 
     public void Parse(AnimeTypes animeType = AnimeTypes.All)
