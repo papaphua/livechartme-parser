@@ -2,8 +2,8 @@
 
 public enum AnimeTypes
 {
-    All = 0,
     Tv = 1,
     Movies = 2,
     Ovas = 3,
+    All = 4
 }

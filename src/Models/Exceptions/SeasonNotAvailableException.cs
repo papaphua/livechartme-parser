@@ -1,6 +1,6 @@
 ﻿namespace LiveChartMeParser.Models.Exceptions;
 
-public sealed class SeasonNotAvailableException : Exception
+public sealed class SeasonNotAvailableException : CustomException
 {
     public SeasonNotAvailableException(string message)
         : base(message)

@@ -8,7 +8,6 @@ namespace LiveChartMeParser.Models.Parser;
 
 public sealed class AnimeParser : Singleton<AnimeParser>
 {
-    private const string Finished = "Finished";
     private const string Unknown = "Unknown";
 
     private readonly ChartParser _chartParser;
@@ -19,31 +18,32 @@ public sealed class AnimeParser : Singleton<AnimeParser>
         _chartParser.Parse();
     }
 
-    public IEnumerable<AnimeDto> Parse(AnimeTypes animeType = AnimeTypes.All)
+    public List<AnimeDto> Parse(AnimeTypes animeType = AnimeTypes.All)
     {
         var url = UrlProvider.GetTypeRoute(animeType);
 
         return Parse(url);
     }
 
-    public IEnumerable<AnimeDto> ParseBySeason(Seasons season, int year, AnimeTypes animeType = AnimeTypes.All)
+    public List<AnimeDto> ParseBySeason(Seasons season, int year, AnimeTypes animeType = AnimeTypes.All)
     {
-        if (!_chartParser.IsAvailable(season, year)) throw new SeasonNotAvailableException(
-            SeasonNotAvailableException.Details(season, year));
+        if (!_chartParser.IsAvailable(season, year))
+            throw new SeasonNotAvailableException(
+                SeasonNotAvailableException.Details(season, year));
 
         var url = UrlProvider.GetSeasonRoute(season, year, animeType);
 
         return Parse(url);
     }
 
-    public IEnumerable<AnimeDto> ParseTba(AnimeTypes animeType = AnimeTypes.All)
+    public List<AnimeDto> ParseTba(AnimeTypes animeType = AnimeTypes.All)
     {
         var url = UrlProvider.GetTbaRoute(animeType);
 
         return Parse(url);
     }
 
-    private IEnumerable<AnimeDto> Parse(string url)
+    private List<AnimeDto> Parse(string url)
     {
         var web = new HtmlWeb();
         var html = web.Load(url);
@@ -56,21 +56,22 @@ public sealed class AnimeParser : Singleton<AnimeParser>
             var title = HtmlEntity.DeEntitize(titleNode.InnerText);
 
             var tagNodes = node.SelectNodes(".//ol[@class='anime-tags']//li//a");
-            var tags = tagNodes.Select(n => HtmlEntity.DeEntitize(n.InnerText)).ToHashSet();
+            var tags = tagNodes?.Select(n => HtmlEntity.DeEntitize(n?.InnerText)).ToHashSet() ??
+                       new HashSet<string> { Unknown };
 
             var nextEpisodeNode = node.SelectSingleNode(".//time[@class='episode-countdown']");
-            var nextEpisode = nextEpisodeNode?.GetAttributeValue("data-label", string.Empty) ?? Finished;
-            var nextEpisodeDate = nextEpisodeNode?.InnerText.Replace($"{nextEpisode}: ", string.Empty) ?? Finished;
+            var nextEpisode = nextEpisodeNode?.GetAttributeValue("data-label", string.Empty) ?? Unknown;
+            var nextEpisodeDate = nextEpisodeNode?.InnerText.Replace($"{nextEpisode}: ", string.Empty) ?? Unknown;
 
             var ratingNode = node.SelectSingleNode(".//div[@class='anime-avg-user-rating']");
             float? rating = float.TryParse(ratingNode?.InnerText, out var ratingValue) ? ratingValue : null;
 
             var studioNodes = node.SelectNodes(".//ul[@class='anime-studios']//li//a");
-            var studios = studioNodes?.Select(n => HtmlEntity.DeEntitize(n.InnerText)).ToHashSet() ??
+            var studios = studioNodes?.Select(n => HtmlEntity.DeEntitize(n?.InnerText)).ToHashSet() ??
                           new HashSet<string> { Unknown };
 
             var sourceNode = node.SelectSingleNode(".//div[@class='anime-source']");
-            var source = HtmlEntity.DeEntitize(sourceNode.InnerText);
+            var source = HtmlEntity.DeEntitize(sourceNode.InnerText) ?? Unknown;
 
             var totalEpisodesNode = node.SelectSingleNode(".//div[@class='anime-episodes']");
             var totalEpisodes = HtmlEntity.DeEntitize(totalEpisodesNode.InnerText);
@@ -93,6 +94,6 @@ public sealed class AnimeParser : Singleton<AnimeParser>
             });
         }
 
-        return new List<AnimeDto>();
+        return animeList;
     }
 }
