@@ -37,4 +37,9 @@ public sealed class ChartParser : Singleton<ChartParser>
             });
         }
     }
+
+    public bool IsAvailable(Seasons season, int year)
+    {
+        return AvailableSeasons.Any(c => c.Year == year && c.Seasons.Contains(season.ToString()));
+    }
 }
